@@ -21,12 +21,11 @@ class App < Sinatra::Base
     redirect ENV['HOMEPAGE_URL']
   end
 
-  post '/shorten', provides: :json do
+  get '/shorten', provides: :json do
     begin
       pass unless request.accept? 'application/json'
       raise ApiTokenError if params[:token] != ENV['API_TOKEN']
-      body = request.body.read
-      long_url = JSON.parse(body)['url']
+      long_url = params[:url].to_s
       long_url = "http://#{long_url}" unless long_url.start_with? 'http'
 
       # Check URL validity
