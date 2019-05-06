@@ -12,7 +12,7 @@ gem 'rake'
 
 gem 'sprockets'
 
-gem 'sass'
+gem 'sassc'
 
 gem 'dotenv'
 
