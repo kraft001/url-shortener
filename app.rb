@@ -10,6 +10,7 @@ require_relative 'services/url_service'
 class ApiTokenError < StandardError; end
 
 class App < Sinatra::Base
+  set :environment, Sprockets::Environment.new
   environment.append_path("assets/stylesheets")
   environment.append_path("assets/javascripts")
 
@@ -80,7 +81,7 @@ class App < Sinatra::Base
 
   get "/assets/*" do
     env["PATH_INFO"].sub!("/assets", "")
-    Sprockets::Environment.new.call(env)
+    settings.environment.call(env)
   end
 
   get '/:short_path' do
