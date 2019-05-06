@@ -11,6 +11,7 @@ CONFIGURATION = YAML.load_file('config.yml')
 class App < Sinatra::Base
   set :url, CONFIGURATION['url']
   set :short_path_length, CONFIGURATION['short_path_length']
+  set :homepage_url, CONFIGURATION['homepage_url']
   set :environment, Sprockets::Environment.new
   environment.append_path("assets/stylesheets")
   environment.append_path("assets/javascripts")
@@ -19,7 +20,7 @@ class App < Sinatra::Base
   set :bind, '0.0.0.0'
 
   get '/' do
-    erb :index
+    redirect settings.homepage_url
   end
 
   post '/shorten', provides: :json do
