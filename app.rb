@@ -7,6 +7,8 @@ require 'yaml'
 require 'dotenv/load'
 require_relative 'services/url_service'
 
+class ApiTokenError < StandardError; end
+
 class App < Sinatra::Base
   environment.append_path("assets/stylesheets")
   environment.append_path("assets/javascripts")
@@ -21,6 +23,7 @@ class App < Sinatra::Base
   post '/shorten', provides: :json do
     begin
       pass unless request.accept? 'application/json'
+      raise ApiTokenError if params[:token] != ENV['API_TOKEN']
       body = request.body.read
       long_url = JSON.parse(body)['url']
       long_url = "http://#{long_url}" unless long_url.start_with? 'http'
@@ -40,6 +43,14 @@ class App < Sinatra::Base
         }
       }.to_json
       [200, {}, res]
+    rescue ApiTokenError # wrong token
+      res = {
+        error: {
+          url: "#{params[:url]}",
+          message: 'The API token is invalid.'
+        }
+      }.to_json
+      [401, {}, res]
     rescue URI::InvalidURIError # bad url
       res = {
         error: {
