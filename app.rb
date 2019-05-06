@@ -6,13 +6,8 @@ require 'uri'
 require 'yaml'
 require 'dotenv/load'
 require_relative 'services/url_service'
-CONFIGURATION = YAML.load_file('config.yml')
 
 class App < Sinatra::Base
-  set :url, CONFIGURATION['url']
-  set :short_path_length, CONFIGURATION['short_path_length']
-  set :homepage_url, CONFIGURATION['homepage_url']
-  set :environment, Sprockets::Environment.new
   environment.append_path("assets/stylesheets")
   environment.append_path("assets/javascripts")
 
@@ -20,7 +15,7 @@ class App < Sinatra::Base
   set :bind, '0.0.0.0'
 
   get '/' do
-    redirect settings.homepage_url
+    redirect ENV['HOMEPAGE_URL']
   end
 
   post '/shorten', provides: :json do
@@ -35,8 +30,8 @@ class App < Sinatra::Base
 
       # Create short link
       url_service = UrlService.new
-      short_path = url_service.create(long_url, settings.short_path_length)
-      short_url = "http://#{settings.url}/#{short_path}"
+      short_path = url_service.create(long_url, ENV['SHORT_PATH_LENGTH'].to_i)
+      short_url = "http://#{ENV['URL']}/#{short_path}"
 
       res = {
         url: {
@@ -74,7 +69,7 @@ class App < Sinatra::Base
 
   get "/assets/*" do
     env["PATH_INFO"].sub!("/assets", "")
-    settings.environment.call(env)
+    Sprockets::Environment.new.call(env)
   end
 
   get '/:short_path' do
